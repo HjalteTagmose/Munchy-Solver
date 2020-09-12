@@ -1,7 +1,5 @@
 import Objects.*;
-
 import java.util.ArrayList;
-
 import Animals.*;
 import Grid.Grid;
 import Solver.*;

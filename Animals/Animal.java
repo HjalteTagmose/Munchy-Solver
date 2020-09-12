@@ -98,7 +98,7 @@ public abstract class Animal extends Object implements Edible
     }
 
     public void move(Vector pos)
-    {            
+    {        
         Grid.instance().clear(tail());
         Grid.instance().set(pos, this);
 
@@ -106,11 +106,13 @@ public abstract class Animal extends Object implements Edible
             body.set(i, body.get(i - 1));
 
         body.set(0, pos);
+        this.pos = pos;    
     }
     public void grow(Vector pos)
     {
         Grid.instance().set(pos, this);
         body.add(0, pos);
+        this.pos = pos;    
     }
     public void finish()
     {

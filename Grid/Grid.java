@@ -25,12 +25,15 @@ public class Grid
     
     public List<Animal> animals;
     public Object[][] grid;
+
     private int sizeX, sizeY;
+    private List<Goal> goals;
 
     public void create(int x, int y)
     {
         sizeX = x;
         sizeY = y;
+        goals = new ArrayList<>();
         animals = new ArrayList<>();
         grid = new Object[x][y];
     }
@@ -38,6 +41,9 @@ public class Grid
     public void place(Object obj)
     {
         set(obj.pos, obj);
+
+        if (obj instanceof Goal)
+            goals.add((Goal)obj);
     }
     public void place(Animal a)
     {
@@ -93,6 +99,25 @@ public class Grid
             copy.add(Animal.copy(a));
         }
         return copy;
+    }
+
+    public Goal getClosestGoal(Animal a)
+    {
+        int minDist = sizeX * sizeY;
+        Goal closest = null;
+
+        for (Goal g : goals) 
+        {
+            int dist = Vector.dist(g, a);
+
+            if (g.typeOK(a) && dist < minDist)
+            {
+                minDist = dist;
+                closest = g;
+            }            
+        }
+
+        return closest;
     }
 
     public void print()

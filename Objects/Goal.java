@@ -3,8 +3,8 @@ import Animals.*;
 
 public class Goal extends Object
 {
-    String type = "";
-    int length = 0;
+    public String type = "";
+    public int length = 0;
 
     public Goal(int x, int y, String req)
     {
@@ -15,15 +15,22 @@ public class Goal extends Object
 
     public boolean canEnter(Animal a)
     {
-        boolean typeOK =
+        return typeOK(a) && lengthOK(a);
+    }
+
+    public boolean typeOK(Animal a)
+    {
+        return
             type.equals("c") && a instanceof Carnivore ||
             type.equals("h") && a instanceof Herbivore ||
             !type.equals("c") && !type.equals("h");
-        boolean lengthOK =
+    }
+
+    public boolean lengthOK(Animal a)
+    {
+        return
             a.body.size() == length ||
             length <= 0;
-        
-        return typeOK && lengthOK;
     }
 
     @Override

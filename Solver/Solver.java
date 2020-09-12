@@ -3,6 +3,7 @@ import java.util.*;
 import Util.Vector;
 import Animals.*;
 import Grid.*;
+import Objects.Goal;
 import Objects.Object;
 
 public class Solver
@@ -34,12 +35,24 @@ public class Solver
 
     public void solve()
     {
-        int iterations = 0;
+        // Presort animals by best position
+        Collections.sort(
+            Grid.instance().animals, 
+            new Comparator<Animal>()
+            {
+                public int compare(Animal a, Animal b) 
+                {
+                    return evaluate(a) - evaluate(b); 
+                }
+            }
+        );
 
+        // Get initial state
+        int iterations = 0;
         initGrid = Grid.instance().grid;
         initAnimals = Grid.instance().copyAnimals();
         reset();
-     
+
         System.out.println("Init:");
         Grid.instance().print();
 
@@ -101,13 +114,16 @@ public class Solver
                         return;
                     }
 
-                    resetToStep(step);
+                    // Evaluate
+                    int steps = countSteps(step) + 1;
+                    int val = evaluate() + steps;
 
-                    int val = evaluate() + countSteps(step);
+                    // Create step
                     Step newStep = new Step(step, i, dir, val);
                     pq.add(newStep);
                     curStep = newStep;
                     
+                    // Reset
                     resetToStep(step);
                 }
                 else
@@ -120,8 +136,26 @@ public class Solver
 
     private int evaluate()
     {
-        // EVALUATE
-        return 0;
+        int eval = 0;
+
+        for (Animal a : Grid.instance().animals) 
+        {
+            eval += evaluate(a);
+        }
+
+        return eval;
+    }
+    private int evaluate(Animal a)
+    {
+        if(a.finished) return -1;
+
+        Goal g = Grid.instance().getClosestGoal(a);
+        int foodNeeded = g.length - a.body.size();
+        int dist = Vector.dist(a, g);
+
+        System.out.println(a + " is " + dist + " away from goal");
+
+        return dist;
     }
     
     private boolean isSolved()

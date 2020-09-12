@@ -1,4 +1,6 @@
 package Util;
+import java.lang.Math;
+import Objects.Object;
 
 public class Vector
 {
@@ -24,5 +26,14 @@ public class Vector
     public static Vector inv(Vector vec)
     { 
         return new Vector(-vec.x, -vec.y);
+    }
+
+    public static int dist(Object a, Object b)
+    {
+        return dist(a.pos, b.pos);
+    }
+    public static int dist(Vector a, Vector b)
+    {
+        return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     }
 }

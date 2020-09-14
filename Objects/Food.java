@@ -3,7 +3,7 @@ import Animals.*;
 import Util.Vector;
 import Grid.*;
 
-public class Food extends Object implements Edible
+public class Food extends Object implements Edible, Resetable
 {
     private boolean isMeat = false;
 
@@ -15,6 +15,12 @@ public class Food extends Object implements Edible
     {
         super(x, y);
         this.isMeat = isMeat;
+    }
+
+    @Override
+    public void reset()
+    {
+        Grid.instance().set(pos, this);
     }
 
     public void eatenAt(Vector pos)

@@ -1,26 +1,26 @@
 package Solver;
 import Util.Vector;
-import Grid.Grid;
+import Animals.Animal;
 
 public class Step implements Comparable<Step>
 {
     public Step prev;
-    public int index;
+    public Animal animal;
     public int val;
     public Vector dir;
     public int step;
 
-    public Step(Step prev, int index, Vector dir, int val)
+    public Step(Step prev, Animal animal, Vector dir, int val)
     {
         this.prev = prev;
-        this.index = index;
+        this.animal = animal;
         this.dir = dir;
         this.val = val;
     }
 
     public void execute()
     {
-        Grid.instance().animals.get(index).tryMove(dir);
+        animal.tryMove(dir);
     }
 
     @Override
@@ -31,9 +31,6 @@ public class Step implements Comparable<Step>
 
     public void print()
     {
-        System.out.println(
-            Grid.instance().animals.get(index).toString()
-             + " moves: " + dir.toString()
-        );
+        System.out.println(animal.toString() + " moves: " + dir.toString());
     }
 }

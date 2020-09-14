@@ -1,45 +1,41 @@
 package Animals;
 
-import Util.*;
 import Grid.*;
 import Objects.*;
-import Animals.*;
 import java.util.*;
 
 import Util.Vector;
 import Objects.Object;
 
-public abstract class Animal extends Object implements Edible
+public abstract class Animal extends Object implements Edible, Resetable
 {
-    public static Animal copy(Animal a)
-    {
-        List<Vector> newBody = new ArrayList(a.body.size());
-        for (Vector part : a.body) 
-            newBody.add(part);
-
-        a = a instanceof Carnivore?
-            new Carnivore(newBody, false) : 
-            new Herbivore(newBody, false) ;
-
-        return a;
-    }
+    public static List<Animal> animals = new ArrayList<>();
 
     public boolean finished = false;
+    private List<Vector> initBody;
     public List<Vector> body;
     public Vector head() { return body.get(0); }
     public Vector tail() { return body.get(body.size()-1); }
 
     public Animal(List<Vector> body)
     {
-        this(body, true);
-    }
-    public Animal(List<Vector> body, boolean place)
-    {
         super(body.get(0));
         this.body = body;
-        
-        if (place)
-            Grid.instance().place(this);
+        initBody = new ArrayList<>();
+        initBody.addAll(body);
+        Grid.instance().place(this);
+        animals.add(this);
+    }
+
+    @Override
+    public void reset()
+    {
+        body.clear();
+        body.addAll(initBody);
+        pos = body.get(0);
+
+        Grid.instance().place(this);
+        finished = false;
     }
 
     public boolean canMove(Vector pos) 
@@ -126,7 +122,6 @@ public abstract class Animal extends Object implements Edible
     @Override
     public String toString()
     {
-        return (this instanceof Carnivore ? "C" : "H") + 
-            Grid.instance().animals.indexOf(this);
+        return (this instanceof Carnivore ? "C" : "H") + animals.indexOf(this);
     }
 }

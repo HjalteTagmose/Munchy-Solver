@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import Animals.*;
 import Grid.Grid;
 import Solver.*;
-import Util.*;
 import Util.Vector;
 
 public class Main
@@ -15,13 +14,14 @@ public class Main
 
     public Main()
     {
-        Grid.instance().create(5, 5);
         createLevel();
         new Solver(1000).solve();
     }
 
     private void createLevel()
     {
+        Grid.instance().create(5, 5);
+
         new Herbivore( new ArrayList<Vector>() {{
             add( new Vector(3,0) );
             add( new Vector(3,1) );

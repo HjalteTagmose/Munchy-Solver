@@ -1,12 +1,11 @@
 package Grid;
 import Objects.*;
 import Animals.*;
-import Util.*;
 import java.util.*;
 import Objects.Object;
 import Util.Vector;
 
-public class Grid 
+public class Grid implements Resetable
 {
     //#region Singleton 
     private static Grid instance;
@@ -23,10 +22,10 @@ public class Grid
     }
     //#endregion
     
-    public List<Animal> animals;
     public Object[][] grid;
 
     private int sizeX, sizeY;
+    private List<Resetable> resetables;
     private List<Goal> goals;
 
     public void create(int x, int y)
@@ -34,7 +33,7 @@ public class Grid
         sizeX = x;
         sizeY = y;
         goals = new ArrayList<>();
-        animals = new ArrayList<>();
+        resetables = new ArrayList<>();
         grid = new Object[x][y];
     }
     
@@ -42,15 +41,15 @@ public class Grid
     {
         set(obj.pos, obj);
 
-        if (obj instanceof Goal)
+        if (obj instanceof Resetable)
+            resetables.add((Resetable)obj);
+        else if (obj instanceof Goal)
             goals.add((Goal)obj);
     }
     public void place(Animal a)
     {
         for(var pos : a.body)
             set(pos, a);
-
-        animals.add(a);
     }
 
     public Object get(Vector pos)
@@ -72,33 +71,20 @@ public class Grid
                pos.x < sizeX && pos.y < sizeY;        
     }
 
-    public void resetTo(Object[][] newGrid, List<Animal> newAnimals)
+    @Override
+    public void reset()
     {
-        grid = newGrid;
         for (int x = 0; x < sizeX; x++)
         {
             for (int y = 0; y < sizeY; y++)
             {
-                Object obj = newGrid[x][y];
-                grid[x][y] = obj instanceof Animal? null : obj;
+                Object obj = grid[x][y];
+                grid[x][y] = obj instanceof Resetable? null : obj;
             }
         }
 
-        animals.clear();
-        for (Animal a : newAnimals)
-        {
-            Animal copy = Animal.copy(a);
-            place(copy);
-        }
-    }
-    public List<Animal> copyAnimals()
-    {
-        List<Animal> copy = new ArrayList<>();
-        for (Animal a : animals)
-        {
-            copy.add(Animal.copy(a));
-        }
-        return copy;
+        for (Resetable r : resetables)
+            r.reset();
     }
 
     public Goal getClosestGoal(Animal a)

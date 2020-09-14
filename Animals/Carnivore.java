@@ -9,10 +9,6 @@ public class Carnivore extends Animal
     {
         super(body);
     }
-    public Carnivore(List<Vector> body, boolean place)
-    {
-        super(body, place);
-    }
 
     @Override
     public boolean canMove(Object obj) 

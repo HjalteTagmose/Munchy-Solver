@@ -8,8 +8,4 @@ public class Herbivore extends Animal
     {
         super(body);
     }
-    public Herbivore(List<Vector> body, boolean place)
-    {
-        super(body, place);
-    }
 }

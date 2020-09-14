@@ -4,14 +4,10 @@ import Util.Vector;
 import Animals.*;
 import Grid.*;
 import Objects.Goal;
-import Objects.Object;
 
 public class Solver
 {
-    private List<Animal> initAnimals;
-    private Object[][] initGrid;
     private PriorityQueue<Step> pq;
-
     private Step curStep = null;
     private int maxIterations;   
     private boolean solved = false;
@@ -37,7 +33,7 @@ public class Solver
     {
         // Presort animals by best position
         Collections.sort(
-            Grid.instance().animals, 
+            Animal.animals, 
             new Comparator<Animal>()
             {
                 public int compare(Animal a, Animal b) 
@@ -47,17 +43,13 @@ public class Solver
             }
         );
 
-        // Get initial state
         int iterations = 0;
-        initGrid = Grid.instance().grid;
-        initAnimals = Grid.instance().copyAnimals();
-        reset();
 
         System.out.println("Init:");
         Grid.instance().print();
 
         while (!solved) 
-        {   
+        {
             if (iterations > maxIterations)
                 return;
             
@@ -91,12 +83,10 @@ public class Solver
         resetToStep(step);
         Grid.instance().print();
 
-        for (int i = 0; i < initAnimals.size(); i++) 
+        for (Animal a : Animal.animals) 
         {
             for (Vector dir : dirs) 
-            {
-                Animal a = Grid.instance().animals.get(i);
-                
+            {                
                 if (a.finished)
                     continue;
 
@@ -104,12 +94,12 @@ public class Solver
                 
                 if (a.tryMove(dir))
                 {
-                    System.out.println(a.toString() + " moves: " + dir.toString());  
+                    System.out.println(a.toString() + " moves: " + dir.toString());
                     Grid.instance().print();
 
                     if (isSolved())
                     {
-                        curStep = new Step(curStep, i, dir, 0);
+                        curStep = new Step(curStep, a, dir, 0);
                         solved = true;
                         return;
                     }
@@ -119,7 +109,7 @@ public class Solver
                     int val = evaluate() + steps;
 
                     // Create step
-                    Step newStep = new Step(step, i, dir, val);
+                    Step newStep = new Step(step, a, dir, val);
                     pq.add(newStep);
                     curStep = newStep;
                     
@@ -138,7 +128,7 @@ public class Solver
     {
         int eval = 0;
 
-        for (Animal a : Grid.instance().animals) 
+        for (Animal a : Animal.animals) 
         {
             eval += evaluate(a);
         }
@@ -160,7 +150,7 @@ public class Solver
     
     private boolean isSolved()
     {
-        for(Animal animal : Grid.instance().animals)
+        for(Animal animal : Animal.animals)
         {
             if (!animal.finished)
             {
@@ -224,6 +214,6 @@ public class Solver
     }
     private void reset()
     {
-        Grid.instance().resetTo(initGrid, initAnimals);
+        Grid.instance().reset();
     }
 }

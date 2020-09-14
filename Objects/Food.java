@@ -1,10 +1,16 @@
 package Objects;
+
+import java.util.*;
 import Animals.*;
 import Util.Vector;
 import Grid.*;
 
 public class Food extends Object implements Edible, Resetable
 {
+    public static List<Food> meats  = new ArrayList<>();
+    public static List<Food> plants = new ArrayList<>();
+
+    public boolean eaten = false;
     private boolean isMeat = false;
 
     public Food(Vector pos, boolean isMeat)
@@ -15,17 +21,22 @@ public class Food extends Object implements Edible, Resetable
     {
         super(x, y);
         this.isMeat = isMeat;
+        
+        if (isMeat)  meats.add(this);
+        else        plants.add(this);
     }
 
     @Override
     public void reset()
     {
         Grid.instance().set(pos, this);
+        eaten = false;
     }
 
     public void eatenAt(Vector pos)
     {
         Grid.instance().clear(pos);
+        eaten = true;
     }
 
     public boolean canEat(Animal a) 

@@ -26,13 +26,11 @@ public class Grid implements Resetable
 
     private int sizeX, sizeY;
     private List<Resetable> resetables;
-    private List<Goal> goals;
 
     public void create(int x, int y)
     {
         sizeX = x;
         sizeY = y;
-        goals = new ArrayList<>();
         resetables = new ArrayList<>();
         grid = new Object[x][y];
     }
@@ -43,8 +41,6 @@ public class Grid implements Resetable
 
         if (obj instanceof Resetable)
             resetables.add((Resetable)obj);
-        else if (obj instanceof Goal)
-            goals.add((Goal)obj);
     }
     public void place(Animal a)
     {
@@ -85,25 +81,6 @@ public class Grid implements Resetable
 
         for (Resetable r : resetables)
             r.reset();
-    }
-
-    public Goal getClosestGoal(Animal a)
-    {
-        int minDist = sizeX * sizeY;
-        Goal closest = null;
-
-        for (Goal g : goals) 
-        {
-            int dist = Vector.dist(g, a);
-
-            if (g.typeOK(a) && dist < minDist)
-            {
-                minDist = dist;
-                closest = g;
-            }            
-        }
-
-        return closest;
     }
 
     public void print()

@@ -1,8 +1,13 @@
 package Objects;
+import java.util.ArrayList;
+import java.util.List;
+
 import Animals.*;
 
 public class Goal extends Object
 {
+    public static List<Goal> goals = new ArrayList<>();
+
     public String type = "";
     public int length = 0;
 
@@ -11,6 +16,7 @@ public class Goal extends Object
         super(x, y);
         type = (req.charAt(0)+"").toLowerCase();
         length = Integer.parseInt(req.substring(1));
+        goals.add(this);
     }
 
     public boolean canEnter(Animal a)

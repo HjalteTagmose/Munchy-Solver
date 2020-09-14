@@ -1,9 +1,12 @@
 package Solver;
+
 import java.util.*;
+import java.util.stream.Collectors;
+
 import Util.Vector;
 import Animals.*;
 import Grid.*;
-import Objects.Goal;
+import Objects.*;
 
 public class Solver
 {
@@ -124,6 +127,7 @@ public class Solver
         }
     }
 
+    //#region Evaluation
     private int evaluate()
     {
         int eval = 0;
@@ -138,16 +142,73 @@ public class Solver
     private int evaluate(Animal a)
     {
         if(a.finished) return -1;
-
-        Goal g = Grid.instance().getClosestGoal(a);
-        int foodNeeded = g.length - a.body.size();
-        int dist = Vector.dist(a, g);
-
-        System.out.println(a + " is " + dist + " away from goal");
-
-        return dist;
+        System.out.println(a + ": dist is " + distToFinish(a));
+        return distToFinish(a);
     }
     
+    private int distToFinish(Animal a)
+    {
+        int shortest = Integer.MAX_VALUE;
+
+        for (Goal g : Goal.goals) 
+        {        
+            List<Vector> points = new ArrayList<>();
+            points.add(a.pos);
+            points.addAll( getClosestFoods(a, g) );
+            points.add(g.pos);
+
+            int dist = 0;
+            for (int i = 0; i < points.size()-1; i++) 
+                dist += Vector.dist(points.get(i), points.get(i+1));
+
+            if (dist < shortest)
+                shortest = dist;
+        }
+
+        return shortest;
+    }
+
+    private List<Vector> getClosestFoods(Animal a, Goal g)
+    {
+        int foodNeeded = g.length - a.body.size();
+        boolean isCarni = a instanceof Carnivore; 
+        
+        List<Vector> pos = new ArrayList<>();
+
+        // Return empty if no food needed
+        if (foodNeeded <= 0) 
+            return pos;
+        
+        // Add appropriate food
+        for (Food f : isCarni? Food.meats : Food.plants)
+        {
+            if (!f.eaten) 
+                pos.add(f.pos);               
+        }
+
+        // Add animals as food if carnivore
+        if (isCarni)
+        {
+            for (Animal ani : Animal.animals)
+            {
+                pos.addAll(ani.body);
+            }
+        }
+
+        // Sort by distance to Animal and Goal
+        Collections.sort(pos, new Comparator<Vector>(){
+            public int compare(Vector posA, Vector posB) 
+            {
+                return 
+                ( Vector.dist(posB, a.pos) + Vector.dist(posB, g.pos) ) -
+                ( Vector.dist(posA, a.pos) + Vector.dist(posA, g.pos) ) ;
+            }
+        });
+
+        // Return first {foodNeeded} elements
+        return pos.stream().limit(foodNeeded).collect(Collectors.toList());
+    }
+
     private boolean isSolved()
     {
         for(Animal animal : Animal.animals)
@@ -159,7 +220,9 @@ public class Solver
         }
         return true;
     }
+    //#endregion
 
+    //#region Step
     private int countSteps(Step step)
     {
         return countSteps(step, 0);
@@ -216,4 +279,5 @@ public class Solver
     {
         Grid.instance().reset();
     }
+    //#endregion
 }

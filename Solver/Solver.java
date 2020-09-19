@@ -84,7 +84,7 @@ public class Solver
         System.out.println("Init: ");     
         resetToStep(step);
         Grid.instance().print();
-
+        
         for (Animal a : Animal.animals) 
         {
             for (Vector dir : dirs) 
@@ -93,10 +93,11 @@ public class Solver
                     continue;
 
                 System.out.println(""); 
+                System.out.println(a + " tries: " + dir); 
                 
                 if (a.tryMove(dir))
                 {
-                    System.out.println(a.toString() + " moves: " + dir.toString());
+                    System.out.println(a + " moves: " + dir);
                     Grid.instance().print();
 
                     if (isSolved())
@@ -151,12 +152,16 @@ public class Solver
 
         for (Goal g : Goal.goals) 
         {        
+            if (!g.typeOK(a)) 
+                continue;
+
             List<Vector> points = new ArrayList<>();
             points.add(a.pos);
             points.addAll( getClosestFoods(a, g) );
             points.add(g.pos);
 
-            int dist = 0;
+            // Prioritize animals close to required length
+            int dist = g.length - a.body.size(); //= 0;
             for (int i = 0; i < points.size()-1; i++) 
                 dist += Vector.dist(points.get(i), points.get(i+1));
 

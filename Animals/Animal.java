@@ -37,6 +37,11 @@ public abstract class Animal extends Object implements Edible, Resetable
         Grid.instance().place(this);
         finished = false;
     }
+    @Override
+    public void markTemp()
+    {
+        //animals cant be temp
+    }
 
     public boolean canMove(Vector pos) 
     {
@@ -60,12 +65,12 @@ public abstract class Animal extends Object implements Edible, Resetable
         if (canMove(newPos))
         {
             Object col = Grid.instance().get(newPos);
-            if ( col == this )
+            if ( col == this && newPos == tail() )
                 move(newPos);
-            else if( col instanceof Edible ) 
-                grow(newPos);
             else if( col instanceof Goal ) 
                 finish();
+            else if( col instanceof Edible ) 
+                grow(newPos, col);
             else
                 move(newPos);
 
@@ -78,6 +83,12 @@ public abstract class Animal extends Object implements Edible, Resetable
     {
         int index = getIndexFromPos(pos);
         int count = body.size()-1;
+
+        if (index <= 0)
+        {
+            finish();
+            return;
+        }
 
         for (int i = count; i > index; i--) 
         {
@@ -93,6 +104,20 @@ public abstract class Animal extends Object implements Edible, Resetable
             if (body.get(i).equals(pos))
                 return i;            
         }
+
+        // TEMP TEST SHIT
+        if (!finished)
+        {
+            System.out.println("");
+            System.out.println(this);
+            System.out.println("Pos: " + pos);
+            System.out.println("Parts:");
+            for (Vector part : body) {
+                System.out.println(part);
+            }
+            System.out.println("");
+        }
+
         return -1;
     }
 
@@ -108,8 +133,11 @@ public abstract class Animal extends Object implements Edible, Resetable
         body.set(0, pos);
         this.pos = pos;    
     }
-    public void grow(Vector pos)
+    public void grow(Vector pos, Object obj)
     {
+        Edible edible = (Edible)obj;
+        edible.eatenAt(pos);
+
         Grid.instance().set(pos, this);
         body.add(0, pos);
         this.pos = pos;    

@@ -12,6 +12,7 @@ public class Food extends Object implements Edible, Resetable
 
     public boolean eaten = false;
     private boolean isMeat = false;
+    private boolean isTemp = false;
 
     public Food(Vector pos, boolean isMeat)
     {
@@ -29,8 +30,21 @@ public class Food extends Object implements Edible, Resetable
     @Override
     public void reset()
     {
+        if (isTemp)
+        {
+            if (isMeat) meats.remove(this);
+            else       plants.remove(this);
+            return;
+        }
+
         Grid.instance().set(pos, this);
         eaten = false;
+    }
+
+    @Override
+    public void markTemp()
+    {
+        isTemp = true;
     }
 
     public void eatenAt(Vector pos)

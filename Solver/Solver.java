@@ -59,6 +59,7 @@ public class Solver
             System.out.println("");
             System.out.println("Iteration: " + iterations);
             tryEverything(curStep);
+            iterations++;
             
             if (solved) 
                 break;
@@ -66,8 +67,6 @@ public class Solver
             Step step = pq.poll();
             resetToStep(step);
             curStep = step;
-
-            iterations++;
         }
 
         System.out.println("");

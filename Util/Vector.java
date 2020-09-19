@@ -12,6 +12,13 @@ public class Vector
         this.y = y;
     }
 
+    @Override 
+    public boolean equals(java.lang.Object obj) 
+    {
+        Vector that = (Vector)obj;
+        return this.x == that.x && this.y == that.y;
+    }
+
     @Override
     public String toString()
     {

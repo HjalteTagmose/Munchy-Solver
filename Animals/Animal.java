@@ -44,6 +44,7 @@ public abstract class Animal extends Object implements Edible, Resetable
             return false;
         
         Object col = Grid.instance().get(pos);
+        if (tail().equals(pos)) return true;
         return canMove(col);
     }
     protected boolean canMove(Object col) 
@@ -59,7 +60,9 @@ public abstract class Animal extends Object implements Edible, Resetable
         if (canMove(newPos))
         {
             Object col = Grid.instance().get(newPos);
-            if( col instanceof Edible ) 
+            if ( col == this )
+                move(newPos);
+            else if( col instanceof Edible ) 
                 grow(newPos);
             else if( col instanceof Goal ) 
                 finish();
@@ -101,6 +104,7 @@ public abstract class Animal extends Object implements Edible, Resetable
         for (int i = body.size()-1; i > 0; i--)
             body.set(i, body.get(i - 1));
 
+        Grid.instance().set(tail(), this);
         body.set(0, pos);
         this.pos = pos;    
     }

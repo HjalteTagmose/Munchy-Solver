@@ -81,14 +81,11 @@ public abstract class Animal extends Object implements Edible, Resetable
 
     public void eatenAt(Vector pos)
     {
+        if (finished)
+            throw new RuntimeException(this + " is already finished, but was eaten somehow?");
+
         int index = getIndexFromPos(pos);
         int count = body.size()-1;
-
-        if (index <= 0)
-        {
-            finish();
-            return;
-        }
 
         for (int i = count; i > index; i--) 
         {
@@ -96,6 +93,9 @@ public abstract class Animal extends Object implements Edible, Resetable
             body.remove(i);
         }
         body.remove(index);
+
+        if (index == 0)
+            finish();
     }
     public int getIndexFromPos(Vector pos)
     {
@@ -103,19 +103,6 @@ public abstract class Animal extends Object implements Edible, Resetable
         {
             if (body.get(i).equals(pos))
                 return i;            
-        }
-
-        // TEMP TEST SHIT
-        if (!finished)
-        {
-            System.out.println("");
-            System.out.println(this);
-            System.out.println("Pos: " + pos);
-            System.out.println("Parts:");
-            for (Vector part : body) {
-                System.out.println(part);
-            }
-            System.out.println("");
         }
 
         return -1;

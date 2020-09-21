@@ -14,6 +14,7 @@ public class Solver
     private Step curStep = null;
     private int maxIterations;   
     private boolean solved = false;
+    private Visualizer visualizer = new Visualizer();
 
     private Vector[] dirs = new Vector[]{
         new Vector(0, 1),
@@ -28,6 +29,7 @@ public class Solver
     }
     public Solver(int maxIterations)
     {
+        visualizer.addCurToDepth(0);
         pq = new PriorityQueue<>();
         this.maxIterations = maxIterations;
     }
@@ -56,8 +58,8 @@ public class Solver
             if (iterations > maxIterations)
                 return;
             
-            System.out.println("");
-            System.out.println("Iteration: " + iterations);
+            // System.out.println("");
+            // System.out.println("Iteration: " + iterations);
             tryEverything(curStep);
             iterations++;
             
@@ -68,6 +70,8 @@ public class Solver
             resetToStep(step);
             curStep = step;
         }
+
+        visualizer.print();
 
         System.out.println("");
         int steps = countSteps(curStep);
@@ -80,10 +84,12 @@ public class Solver
 
     private void tryEverything(Step step)
     {
+        int depth = countSteps(step) + 1;
+
         // PRINT START STEP
-        System.out.println("Init: ");     
         resetToStep(step);
-        Grid.instance().print();
+        // System.out.println("Init: ");     
+        // Grid.instance().print();
         
         for (Animal a : Animal.animals) 
         {
@@ -92,13 +98,15 @@ public class Solver
                 if (a.finished)
                     continue;
 
-                System.out.println(""); 
-                System.out.println(a + " tries: " + dir); 
+                // System.out.println(""); 
+                // System.out.println(a + " tries: " + dir); 
                 
                 if (a.tryMove(dir))
                 {
-                    System.out.println(a + " moves: " + dir);
-                    Grid.instance().print();
+                    // System.out.println(a + " moves: " + dir);
+                    //Grid.instance().print();
+
+                    visualizer.addCurToDepth(depth);
 
                     if (isSolved())
                     {
@@ -121,7 +129,7 @@ public class Solver
                 }
                 else
                 {
-                    System.out.println(a.toString() + " couldn't move: " + dir.toString());
+                    // System.out.println(a.toString() + " couldn't move: " + dir.toString());
                 }
             }
         }
@@ -142,7 +150,7 @@ public class Solver
     private int evaluate(Animal a)
     {
         if(a.finished) return -1;
-        System.out.println(a + ": dist is " + distToFinish(a));
+        //System.out.println(a + ": dist is " + distToFinish(a));
         return distToFinish(a);
     }
     
@@ -161,7 +169,7 @@ public class Solver
             points.add(g.pos);
 
             // Prioritize animals close to required length
-            int dist = g.length - a.body.size(); //= 0;
+            int dist = 0;//g.length - a.body.size();
             for (int i = 0; i < points.size()-1; i++) 
                 dist += Vector.dist(points.get(i), points.get(i+1));
 

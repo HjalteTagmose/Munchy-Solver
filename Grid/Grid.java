@@ -23,12 +23,11 @@ public class Grid implements Resetable
     //#endregion
     
     public Object[][] grid;
-
-    private int sizeX, sizeY;
-    private List<Resetable> resetables;
+    public int sizeX, sizeY;
 
     private boolean setupFinished = false;
     private List<Object> temp;
+    private List<Resetable> resetables;
 
     public void create(int x, int y)
     {
@@ -108,20 +107,30 @@ public class Grid implements Resetable
         //grid cant be temp
     }
 
-    public void print()
+    @Override
+    public String toString()
     {
+        StringBuilder str = new StringBuilder();
+
         for (int y = 0; y < sizeY; y++) 
         {
             for (int x = 0; x < sizeX; x++) 
             {
                 Object obj = get(new Vector(x,y));
-                System.out.print(
+
+                str.append(
                     (obj == null?".":obj.toString()) + 
                     ((obj instanceof Goal || 
                       obj instanceof Animal)?"":" ")
                 );
             }
-            System.out.println("");
+            str.append('*');
         }
+
+        return str.toString();
+    }
+    public void print()
+    {
+        System.out.println(toString().replace('*', '\n'));
     }
 }

@@ -168,27 +168,9 @@ public class Visualizer extends JFrame
     {
         public DrawPane()
         {
-            setAutoscrolls(true);
+            setAutoscrolls(true); 
         }
 
-        @Override
-        public boolean getScrollableTracksViewportWidth()
-        {
-            return false;
-        }
-
-        @Override
-        public boolean getScrollableTracksViewportHeight()
-        {
-            return false;
-        }
-
-        @Override
-        public Dimension getPreferredScrollableViewportSize()
-        {
-            return getPreferredSize();
-        }
-        
         public void paintComponent(Graphics g) 
         {
             super.paintComponent(g);
@@ -205,16 +187,10 @@ public class Visualizer extends JFrame
                 ));
         }
 
-        @Override
-        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-            // TODO Auto-generated method stub
-            return 0;
-        }
+        @Override public boolean getScrollableTracksViewportWidth() { return false; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) { return 0; }
+        @Override public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) { return 0; }
     }
 }

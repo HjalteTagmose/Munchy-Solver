@@ -1,71 +1,220 @@
 package Solver;
 
+import javax.swing.*;
+import javax.swing.event.MouseInputListener;
+
+import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
+import java.util.List;
 
 import Grid.Grid;
 
-public class Visualizer 
+public class Visualizer extends JFrame 
 {
-    private List<List<String[]>> visual;
-
     public Visualizer()
     {
-        visual = new ArrayList<>();
-        visual.add(new ArrayList<>());
+        setTitle("Visualizer");
+        setLocation(new Point(300,200));
+        setLayout(new GridLayout());    
+        setSize(1000,1000);
+        setResizable(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  
+        
+        drawPane = new DrawPane();
+        drawPane.setPreferredSize(new Dimension(1000, 1000));
+        drawPane.setFont( new Font(Font.MONOSPACED, Font.PLAIN, 12) );
+        drawPane.setVisible(true);
+        
+        pane = new JScrollPane(drawPane);
+        pane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        add(pane, new GridLayout());
+        
+        pack();
+        setSize(1000,1000);
     }
 
-    public void addCurToDepth(int d)
-    {
-        if (d >= visual.size())
-            visual.add(new ArrayList<>());
+    private static final int spacing = 100;
+    private static int depth = 0;
+    private static StepVisual root;
+    private static DrawPane drawPane;
+    private static JScrollPane pane;
 
-        String[] cur = Grid.instance().toString().split("\\*");
-        visual.get(d).add(cur);
+    private Map<Step, StepVisual> stepToVisual = new HashMap<>();
+    
+    public void start()
+    {
+        root = new StepVisual();
+        stepToVisual.put(null, root);
+        depth = 1;
     }
 
-    public void print()
+    public void addStep(Step step)
     {
-        System.out.println(toString());
+        if (step.depth > depth)
+            depth = step.depth;
+
+        StepVisual visual = new StepVisual();
+        StepVisual parent = stepToVisual.get(step.prev);
+
+        parent.addChild(visual);
+        stepToVisual.put(step, visual);
     }
-
-    @Override
-    public String toString() 
+    
+    public void showSolve(List<Step> steps)
     {
-        return build().toString();      
-    }
-
-    private StringBuilder build()
-    {
-        StringBuilder builder = new StringBuilder();
-        int d = 0;
-
-        for (var list : visual) 
+        for (Step step : steps) 
         {
-            builder.append("DEPTH: " + d);
-            builder.append("\n"); 
-            String depth = pack(list);
-            builder.append(depth);
-            builder.append("\n"); 
-            d++;
+            stepToVisual.get(step).solveStep = true;
+        }
+    }
+
+    public void visualize()
+    {
+        setVisible(true);
+        repaint();
+        pane.revalidate();
+    }
+
+    private static class StepVisual
+    {
+        private int x, y;
+        private int treeWidth;
+        private List<StepVisual> children;
+        private String[] gridLines;
+        private boolean solveStep = false;
+
+        public StepVisual()
+        {
+            this(0,0);
         }
 
-        return builder;
-    }
-
-    private String pack(List<String[]> list)
-    {
-        StringBuilder builder = new StringBuilder();
-
-        for (int i = 0; i < Grid.instance().sizeY; i++) 
+        public StepVisual(int x, int y)
         {
-            for (String[] lines : list) 
+            this.x = x;
+            this.y = y;
+            
+            children = new ArrayList<>();
+            gridLines = Grid.instance().toString().split("\\*");
+        }
+
+        public void addChild(StepVisual step)
+        {
+            children.add(step);
+        }
+
+        public void draw(Graphics g)
+        {
+            for (StepVisual child : children)
             {
-                builder.append(lines[i]);
-                builder.append("      ");
+                g.setColor(child.solveStep ? Color.lightGray : Color.black);
+                g.drawLine(x, y, child.x(), child.y());
+                g.setColor(Color.black);
+                child.draw(g);
             }
-            builder.append("\n");
+            drawGrid(g, x, y);
         }
 
-        return builder.toString();
+        public void align()
+        {  
+            int c = children.size();
+            int curX = -(treeWidth / 2) + x;
+
+            for (int i = 0; i < c; i++)
+            {
+                StepVisual child = children.get(i);
+
+                child.setX( curX + child.treeWidth/2 );
+                child.setY( y + spacing );
+                child.align();
+
+                curX += child.treeWidth;
+            }
+        }
+
+        public int getTreeWidth()
+        {
+            treeWidth = 0;
+            for (StepVisual step : children) 
+                treeWidth += step.getTreeWidth();
+
+            if (children.size() == 0)
+                treeWidth = spacing;
+            
+            return treeWidth;
+        }
+
+        private void drawGrid(Graphics g, int x, int y) 
+        {
+            int h = g.getFontMetrics().getHeight();
+            int w = (int)g.getFontMetrics().getStringBounds(gridLines[0], g).getWidth();
+
+            g.setColor(solveStep ? Color.lightGray : Color.white);
+            g.fillRect(x, y, w, h * gridLines.length);
+            
+            g.setColor(Color.black);
+            for (String line : gridLines)
+                g.drawString(line, x, y += h);
+        }
+
+        public int x() { return x; }
+        public int y() { return y; }
+        public void setX(int x) { this.x = x; }
+        public void setY(int y) { this.y = y; }
+    }
+    
+    private static class DrawPane extends JPanel implements Scrollable
+    {
+        public DrawPane()
+        {
+            setAutoscrolls(true);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth()
+        {
+            return false;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight()
+        {
+            return false;
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize()
+        {
+            return getPreferredSize();
+        }
+        
+        public void paintComponent(Graphics g) 
+        {
+            super.paintComponent(g);
+            int w = root.getTreeWidth();
+            root.setX(w / 2);
+            root.setY(10);
+            root.align();
+            root.draw(g);
+
+            setPreferredSize(
+                new Dimension(
+                    w + spacing, 
+                    (depth+1) * spacing + 20
+                ));
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            // TODO Auto-generated method stub
+            return 0;
+        }
     }
 }

@@ -29,7 +29,7 @@ public class Solver
     }
     public Solver(int maxIterations)
     {
-        visualizer.addCurToDepth(0);
+        visualizer.start();
         pq = new PriorityQueue<>();
         this.maxIterations = maxIterations;
     }
@@ -71,7 +71,8 @@ public class Solver
             curStep = step;
         }
 
-        visualizer.print();
+        visualizer.showSolve(getSteps(curStep));
+        visualizer.visualize();
 
         System.out.println("");
         int steps = countSteps(curStep);
@@ -106,11 +107,10 @@ public class Solver
                     // System.out.println(a + " moves: " + dir);
                     //Grid.instance().print();
 
-                    visualizer.addCurToDepth(depth);
-
                     if (isSolved())
                     {
-                        curStep = new Step(curStep, a, dir, 0);
+                        curStep = new Step(curStep, a, dir, 0, depth);
+                        visualizer.addStep(curStep);
                         solved = true;
                         return;
                     }
@@ -120,7 +120,8 @@ public class Solver
                     int val = evaluate() + steps;
 
                     // Create step
-                    Step newStep = new Step(step, a, dir, val);
+                    Step newStep = new Step(step, a, dir, val, depth);
+                    visualizer.addStep(newStep);
                     pq.add(newStep);
                     curStep = newStep;
                     
@@ -235,6 +236,23 @@ public class Solver
     //#endregion
 
     //#region Step
+    private List<Step> getSteps(Step step)
+    {
+        List<Step> steps = new ArrayList<>();
+        getSteps(step, steps);
+        return steps;
+    }
+
+    private void getSteps(Step step, List<Step> steps)
+    {
+        steps.add(step);
+
+        if (step == null)
+            return;
+
+        getSteps(step.prev, steps);
+    }
+
     private int countSteps(Step step)
     {
         return countSteps(step, 0);

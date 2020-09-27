@@ -9,13 +9,15 @@ public class Step implements Comparable<Step>
     public int val;
     public Vector dir;
     public int step;
+    public int depth;
 
-    public Step(Step prev, Animal animal, Vector dir, int val)
+    public Step(Step prev, Animal animal, Vector dir, int val, int depth)
     {
         this.prev = prev;
         this.animal = animal;
         this.dir = dir;
         this.val = val;
+        this.depth = depth;
     }
 
     public void execute()

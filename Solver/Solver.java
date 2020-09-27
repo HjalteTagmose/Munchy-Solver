@@ -53,13 +53,10 @@ public class Solver
         System.out.println("Init:");
         Grid.instance().print();
 
-        while (!solved) 
+        while (!solved && iterations < maxIterations) 
         {
-            if (iterations > maxIterations)
-                return;
-            
             // System.out.println("");
-            // System.out.println("Iteration: " + iterations);
+            System.out.println("Iteration: " + iterations);
             tryEverything(curStep);
             iterations++;
             
@@ -71,16 +68,20 @@ public class Solver
             curStep = step;
         }
 
-        visualizer.showSolve(getSteps(curStep));
+        if (solved)
+        {
+            System.out.println("");
+            int steps = countSteps(curStep);
+            printSteps(curStep);
+            System.out.println("");
+            System.out.println("--- RESULT ---");
+            System.out.println("SOLVED IN " + steps + " STEPS");
+            System.out.println("SOLVE TOOK " + iterations + " ITERATIONS");
+    
+            visualizer.showSolve(getSteps(curStep));
+        }
+        
         visualizer.visualize();
-
-        System.out.println("");
-        int steps = countSteps(curStep);
-        printSteps(curStep);
-        System.out.println("");
-        System.out.println("--- RESULT ---");
-        System.out.println("SOLVED IN " + steps + " STEPS");
-        System.out.println("SOLVE TOOK " + iterations + " ITERATIONS");
     }
 
     private void tryEverything(Step step)

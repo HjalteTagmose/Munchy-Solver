@@ -89,7 +89,8 @@ public abstract class Animal extends Object implements Edible, Resetable
 
         for (int i = count; i > index; i--) 
         {
-            new Food(body.get(i), true);
+            Food meat = new Food(body.get(i), true);
+            meat.markTemp();
             body.remove(i);
         }
         body.remove(index);
@@ -116,8 +117,8 @@ public abstract class Animal extends Object implements Edible, Resetable
         for (int i = body.size()-1; i > 0; i--)
             body.set(i, body.get(i - 1));
 
-        Grid.instance().set(tail(), this);
         body.set(0, pos);
+        Grid.instance().set(tail(), this);
         this.pos = pos;    
     }
     public void grow(Vector pos, Object obj)

@@ -4,6 +4,8 @@ import Animals.Animal;
 
 public class Step implements Comparable<Step>
 {
+    public static int STEPS = 1;
+
     public Step prev;
     public Animal animal;
     public int val;
@@ -18,6 +20,7 @@ public class Step implements Comparable<Step>
         this.dir = dir;
         this.val = val;
         this.depth = depth;
+        step = STEPS++;
     }
 
     public void execute()

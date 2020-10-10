@@ -80,7 +80,12 @@ public class Solver
     
             visualizer.showSolve(getSteps(curStep));
         }
-        
+
+        visualize();
+    }
+
+    public void visualize()
+    {
         visualizer.visualize();
     }
 
@@ -126,6 +131,9 @@ public class Solver
                     pq.add(newStep);
                     curStep = newStep;
                     
+                    //TEST
+                    //visualize();
+
                     // Reset
                     resetToStep(step);
                 }
@@ -158,59 +166,66 @@ public class Solver
     
     private int distToFinish(Animal a)
     {
-        int shortest = Integer.MAX_VALUE;
+        int shortest = 100000; //avoid overflow
+        boolean noGoal = true;
 
         for (Goal g : Goal.goals) 
         {        
             if (!g.typeOK(a)) 
                 continue;
 
-            List<Vector> points = new ArrayList<>();
-            points.add(a.pos);
-            points.addAll( getClosestFoods(a, g) );
-            points.add(g.pos);
+            noGoal = false;
 
             // Prioritize animals close to required length
-            int dist = 0;//g.length - a.body.size();
-            for (int i = 0; i < points.size()-1; i++) 
-                dist += Vector.dist(points.get(i), points.get(i+1));
-
+            int dist = getPathLength(a, g);
             if (dist < shortest)
                 shortest = dist;
+        }
+        
+        if (noGoal)
+        {
+            var foods = getFoods(a instanceof Carnivore);
+            return getPathLength(new ArrayList<>() {{ add( a.pos ); addAll( foods ); }}) - 
+                    foods.size();
         }
 
         return shortest;
     }
 
-    private List<Vector> getClosestFoods(Animal a, Goal g)
+    private int getPathLength(Animal a, Goal g)
     {
+        // Find how much food is needed
         int foodNeeded = g.length - a.body.size();
         boolean isCarni = a instanceof Carnivore; 
         
-        List<Vector> pos = new ArrayList<>();
-
-        // Return empty if no food needed
-        if (foodNeeded <= 0) 
-            return pos;
+        // Return direct if no food needed
+        if (foodNeeded <= 0)
+            return Vector.dist(a, g);
         
-        // Add appropriate food
-        for (Food f : isCarni? Food.meats : Food.plants)
+        // Keep list of points in path
+        List<Vector> points = new ArrayList<>();
+        points.add(a.pos);
+        
+        // Get food positions
+        List<Vector> foodPos = getFoods(isCarni);
+        int foodOnBoard = foodPos.size() - (isCarni? a.body.size() : 0);
+        
+        // Return max if not enough food available
+        if (foodNeeded > foodOnBoard)
         {
-            if (!f.eaten) 
-                pos.add(f.pos);               
-        }
-
-        // Add animals as food if carnivore
-        if (isCarni)
-        {
-            for (Animal ani : Animal.animals)
-            {
-                pos.addAll(ani.body);
-            }
+            int alive = 0;
+            
+            for (Animal animal : Animal.animals) 
+                alive += animal.finished? 0 : 1;
+            
+            int val = 10000 + (alive > 1 ? 0 : 10000);
+            System.out.println(alive);
+            System.out.println(val);
+            return val;
         }
 
         // Sort by distance to Animal and Goal
-        Collections.sort(pos, new Comparator<Vector>(){
+        Collections.sort(foodPos, new Comparator<Vector>(){
             public int compare(Vector posA, Vector posB) 
             {
                 return 
@@ -219,8 +234,49 @@ public class Solver
             }
         });
 
-        // Return first {foodNeeded} elements
-        return pos.stream().limit(foodNeeded).collect(Collectors.toList());
+        // Add first {foodNeeded} elements & finally goal
+        points.addAll(
+            foodPos.stream()
+                   .limit(foodNeeded)
+                   .collect(Collectors.toList())
+        );
+        points.add(g.pos);
+
+        return getPathLength(points);
+    }
+
+    private List<Vector> getFoods(boolean isCarni)
+    {
+        List<Vector> foods = new ArrayList<>();
+
+        // Add appropriate food
+        for (Food f : isCarni? Food.meats : Food.plants)
+        {
+            if (!f.eaten) 
+                foods.add(f.pos);       
+        }
+
+        // Add animals as food if carnivore
+        if (isCarni)
+        {
+            for (Animal ani : Animal.animals)
+            {
+                if (!ani.finished)
+                    foods.addAll(ani.body);
+            }
+        }
+
+        return foods;
+    }
+
+    private int getPathLength(List<Vector> points)
+    {
+        // Find length of path
+        int dist = 0;
+        for (int i = 0; i < points.size()-1; i++) 
+            dist += Vector.dist(points.get(i), points.get(i+1));
+
+        return dist;
     }
 
     private boolean isSolved()

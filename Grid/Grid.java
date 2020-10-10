@@ -25,31 +25,25 @@ public class Grid implements Resetable
     public Object[][] grid;
     public int sizeX, sizeY;
 
-    private boolean setupFinished = false;
-    private List<Object> temp;
     private List<Resetable> resetables;
 
     public void create(int x, int y)
     {
         sizeX = x;
         sizeY = y;
-        temp = new ArrayList<>();
         resetables = new ArrayList<>();
         grid = new Object[x][y];
     }
 
     public void finish()
     {
-        setupFinished = true;
     }
     
     public void place(Object obj)
     {
         set(obj.pos, obj);
 
-        if (setupFinished)
-            temp.add(obj);
-        else if (obj instanceof Resetable)
+        if (obj instanceof Resetable)
             resetables.add((Resetable)obj);
     }
     public void place(Animal a)
@@ -84,11 +78,6 @@ public class Grid implements Resetable
     @Override
     public void reset()
     {
-        for (Object obj : temp) 
-            clear(obj);
-
-        temp.clear();
-
         for (int x = 0; x < sizeX; x++)
         {
             for (int y = 0; y < sizeY; y++)

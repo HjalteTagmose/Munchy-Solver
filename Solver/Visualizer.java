@@ -53,7 +53,7 @@ public class Visualizer extends JFrame
         if (step.depth > depth)
             depth = step.depth;
 
-        StepVisual visual = new StepVisual();
+        StepVisual visual = new StepVisual(step);
         StepVisual parent = stepToVisual.get(step.prev);
 
         parent.addChild(visual);
@@ -82,13 +82,20 @@ public class Visualizer extends JFrame
         private List<StepVisual> children;
         private String[] gridLines;
         private boolean solveStep = false;
+        private String info = "0"; 
 
         public StepVisual()
         {
             this(0,0);
         }
 
-        public StepVisual(int x, int y)
+        public StepVisual(Step step)
+        {
+            this();
+            info = "[" + step.step + "] " + step.animal +" "+ step.val;
+        }
+
+        private StepVisual(int x, int y)
         {
             this.x = x;
             this.y = y;
@@ -147,7 +154,10 @@ public class Visualizer extends JFrame
         {
             int h = g.getFontMetrics().getHeight();
             int w = (int)g.getFontMetrics().getStringBounds(gridLines[0], g).getWidth();
-
+            
+            g.setColor(Color.black);
+            g.drawString(info, x, y-h);
+            
             g.setColor(solveStep ? Color.lightGray : Color.white);
             g.fillRect(x, y, w, h * gridLines.length);
             

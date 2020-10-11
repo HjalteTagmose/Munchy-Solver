@@ -42,6 +42,6 @@ public class Goal extends Object
     @Override
     public String toString()
     {
-        return type + length;
+        return type + length + (length < 10? " ":"");
     }
 }

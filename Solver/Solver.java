@@ -16,6 +16,9 @@ public class Solver
     private boolean solved = false;
     private Visualizer visualizer = new Visualizer();
 
+    private Map<String, Step> stepMap;
+    private int duplicates = 0;
+
     private Vector[] dirs = new Vector[]{
         new Vector(0, 1),
         new Vector(0, -1),
@@ -31,6 +34,7 @@ public class Solver
     {
         visualizer.start();
         pq = new PriorityQueue<>();
+        stepMap = new HashMap<>();
         this.maxIterations = maxIterations;
     }
 
@@ -77,6 +81,9 @@ public class Solver
             System.out.println("--- RESULT ---");
             System.out.println("SOLVED IN " + steps + " STEPS");
             System.out.println("SOLVE TOOK " + iterations + " ITERATIONS");
+            System.out.println("");
+            System.out.println("Steps: " + Step.STEPS);
+            System.out.println("Duplicates: " + duplicates);
     
             visualizer.showSolve(getSteps(curStep));
         }
@@ -91,50 +98,26 @@ public class Solver
 
     private void tryEverything(Step step)
     {
-        int depth = countSteps(step) + 1;
-
-        // PRINT START STEP
-        resetToStep(step);
-        // System.out.println("Init: ");     
-        // Grid.instance().print();
-        
         for (Animal a : Animal.animals) 
         {
             for (Vector dir : dirs) 
-            {                
+            {
                 if (a.finished)
                     continue;
 
-                // System.out.println(""); 
-                // System.out.println(a + " tries: " + dir); 
-                
                 if (a.tryMove(dir))
                 {
-                    // System.out.println(a + " moves: " + dir);
-                    //Grid.instance().print();
-
+                    // Check if solved
                     if (isSolved())
                     {
-                        curStep = new Step(curStep, a, dir, 0, depth);
+                        curStep = new Step(curStep, a, dir, 0, step.depth+1);
                         visualizer.addStep(curStep);
                         solved = true;
                         return;
                     }
 
-                    // Evaluate
-                    int steps = countSteps(step) + 1;
-                    int val = evaluate() + steps;
-
-                    // Create step
-                    Step newStep = new Step(step, a, dir, val, depth);
-                    visualizer.addStep(newStep);
-                    pq.add(newStep);
-                    curStep = newStep;
-                    
-                    //TEST
-                    //visualize();
-
-                    // Reset
+                    // Create step and reset
+                    createStep(step, a, dir);
                     resetToStep(step);
                 }
                 else
@@ -293,6 +276,28 @@ public class Solver
     //#endregion
 
     //#region Step
+    private void createStep(Step prevStep, Animal a, Vector dir)
+    {
+        // Check if duplicate
+        String stepKey = Grid.instance().toString();
+        if (stepMap.containsKey(stepKey))
+        {
+            duplicates++;
+            return;
+        }
+        else stepMap.put(stepKey, prevStep);
+
+        // Evaluate
+        int depth = prevStep == null? 1 : prevStep.depth +1;
+        int val = evaluate() + depth;
+
+        // Create step
+        Step newStep = new Step(prevStep, a, dir, val, depth);
+        visualizer.addStep(newStep);
+        pq.add(newStep);
+        curStep = newStep;
+    }
+
     private List<Step> getSteps(Step step)
     {
         List<Step> steps = new ArrayList<>();

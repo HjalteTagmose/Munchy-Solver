@@ -144,4 +144,10 @@ public abstract class Animal extends Object implements Edible, Resetable
     {
         return (this instanceof Carnivore ? "C" : "H") + animals.indexOf(this);
     }
+
+    public String toStringAtPos(int x, int y)
+    {
+        int i = getIndexFromPos(new Vector(x, y));
+        return toString() + i;
+    }
 }

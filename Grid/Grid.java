@@ -107,11 +107,10 @@ public class Grid implements Resetable
             {
                 Object obj = get(new Vector(x,y));
 
-                str.append(
-                    (obj == null?".":obj.toString()) + 
-                    ((obj instanceof Goal || 
-                      obj instanceof Animal)?"":" ")
-                );
+                if (obj == null) str.append(" . ");
+                else if (obj instanceof Goal) str.append(obj.toString());
+                else if (obj instanceof Animal) str.append( ((Animal)obj).toStringAtPos(x, y) );
+                else str.append(" "+obj.toString()+" ");
             }
             str.append('*');
         }

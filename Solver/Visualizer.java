@@ -73,6 +73,7 @@ public class Visualizer extends JFrame
         setVisible(true);
         repaint();
         pane.revalidate();
+        repaint();
     }
 
     private static class StepVisual
